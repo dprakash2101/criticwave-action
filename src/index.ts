@@ -64,12 +64,9 @@ async function run() {
     const styleGuide = core.getInput('pr-style-guide', { required: true });
 
     // Env vars for your API secrets
-    const REVIEW_API_URL = process.env.REVIEW_API_URL;
-    const AUTHORIZATION_HEADER = process.env.AUTHORIZATION_HEADER;
+    const REVIEW_API_URL = "https://suggesstionsservice.onrender.com";
 
-    if (!REVIEW_API_URL || !AUTHORIZATION_HEADER) {
-      throw new Error('❌ REVIEW_API_URL and AUTHORIZATION_HEADER environment variables must be set');
-    }
+    
 
     const context = github.context;
     const pr = context.payload.pull_request;
@@ -166,7 +163,6 @@ async function run() {
       method: 'POST',
       headers: {
         'GeminiApiKey': geminiApiKey,
-        'Authorization': AUTHORIZATION_HEADER
       },
       body: form
     });
