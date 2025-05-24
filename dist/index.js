@@ -36634,11 +36634,12 @@ async function run() {
         for (const contextFilePath of contextFilePaths) {
             form.append('ContextFiles', fs_1.default.createReadStream(contextFilePath));
         }
-        core.info(`📡 Sending review request to API: ${REVIEW_API_URL}?model=${model}`);
+        core.info(`📡 Sending review request to API: ${REVIEW_API_URL}/v1/beta/review?model=${model}`);
         const response = await (0, node_fetch_1.default)(`${REVIEW_API_URL}/v1/beta/review?model=${model}`, {
             method: 'POST',
             headers: {
                 'GeminiApiKey': geminiApiKey,
+                ...form.getHeaders(),
             },
             body: form
         });
