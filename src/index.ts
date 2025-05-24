@@ -162,12 +162,11 @@ async function run() {
 
     core.info(`📡 Sending review request to API: ${REVIEW_API_URL}?model=${model}`);
 
-    const response = await fetch(`${REVIEW_API_URL}?model=${model}`, {
+    const response = await fetch(`${REVIEW_API_URL}/v1/beta/review?model=${model}`, {
       method: 'POST',
       headers: {
         'GeminiApiKey': geminiApiKey,
-        'Authorization': AUTHORIZATION_HEADER,
-        ...form.getHeaders()
+        'Authorization': AUTHORIZATION_HEADER
       },
       body: form
     });
