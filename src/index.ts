@@ -25,9 +25,7 @@ async function wakeUpApi(apiUrl: string) {
   try {
     const wakeupResponse = await fetch(apiUrl + '/api/WakeUp', {
       method: 'GET',
-      headers: {
-        accept: '*/*',
-      },
+      headers: { accept: '*/*' },
     });
     if (!wakeupResponse.ok) {
       core.warning(`WakeUp API responded with status ${wakeupResponse.status}`);
@@ -57,16 +55,11 @@ async function run() {
   try {
     core.startGroup("🚀 Starting CriticWave PR Review");
 
-    // Inputs
     const token = core.getInput('github-token', { required: true });
     const geminiApiKey = core.getInput('gemini-api-key', { required: true });
     const model = core.getInput('model') || 'gemini-2.0-flash';
     const styleGuide = core.getInput('pr-style-guide', { required: true });
-
-    // Env vars for your API secrets
     const REVIEW_API_URL = "https://suggesstionsservice.onrender.com";
-
-    
 
     const context = github.context;
     const pr = context.payload.pull_request;
@@ -76,41 +69,26 @@ async function run() {
     const { owner, repo } = context.repo;
     const prNumber = pr.number;
 
-    // Wake up your API
     await wakeUpApi(REVIEW_API_URL);
 
     core.info(`🔍 Fetching PR diff for PR #${prNumber}...`);
-    // Get raw diff text as string
     const diffResponse = await octokit.request<string>('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
-      owner,
-      repo,
-      pull_number: prNumber,
-      headers: {
-        accept: 'application/vnd.github.v3.diff'
-      }
+      owner, repo, pull_number: prNumber,
+      headers: { accept: 'application/vnd.github.v3.diff' }
     });
 
-    // diffResponse.data is string containing the diff
     const diff = diffResponse.data;
-
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'criticwave-'));
     const diffPath = path.join(tmpDir, 'diff.patch');
     fs.writeFileSync(diffPath, diff, 'utf-8');
     core.info(`📁 Diff saved at ${diffPath}`);
 
-    // Get list of changed files in the PR
     core.info("📄 Fetching changed files...");
     const changedFiles: string[] = [];
     const perPage = 100;
     let page = 1;
     while (true) {
-      const filesResponse = await octokit.rest.pulls.listFiles({
-        owner,
-        repo,
-        pull_number: prNumber,
-        per_page: perPage,
-        page: page,
-      });
+      const filesResponse = await octokit.rest.pulls.listFiles({ owner, repo, pull_number: prNumber, per_page: perPage, page });
       if (filesResponse.data.length === 0) break;
       for (const file of filesResponse.data) {
         changedFiles.push(file.filename);
@@ -120,15 +98,11 @@ async function run() {
     }
     core.info(`📝 Found ${changedFiles.length} changed files.`);
 
-    // Download changed files content at PR head commit
     const contextFilePaths: string[] = [];
     for (const filename of changedFiles) {
       try {
         const fileResponse = await octokit.rest.repos.getContent({
-          owner,
-          repo,
-          path: filename,
-          ref: pr.head.sha
+          owner, repo, path: filename, ref: pr.head.sha
         });
 
         if (!('content' in fileResponse.data)) {
@@ -138,7 +112,7 @@ async function run() {
 
         const contentBase64 = fileResponse.data.content;
         const buffer = Buffer.from(contentBase64, 'base64');
-        const safeFileName = filename.replace(/[\\/]/g, '_'); // sanitize
+        const safeFileName = filename.replace(/[\\/]/g, '_');
         const filePath = path.join(tmpDir, safeFileName);
         fs.writeFileSync(filePath, buffer);
         contextFilePaths.push(filePath);
@@ -148,7 +122,7 @@ async function run() {
       }
     }
 
-    // Prepare form data for your API request
+    // Prepare form data
     const form = new FormData();
     form.append('PRNumber', prNumber.toString());
     form.append('StyleGuide', styleGuide);
@@ -157,7 +131,19 @@ async function run() {
       form.append('ContextFiles', fs.createReadStream(contextFilePath));
     }
 
-    core.info(`📡 Sending review request to API: ${REVIEW_API_URL}/v1/beta/review?model=${model}`);
+    // 🔍 Log request details
+    core.info("🧪 Logging form data before sending request...");
+    core.info(`➡️ REVIEW_API_URL: ${REVIEW_API_URL}`);
+    core.info(`➡️ Model: ${model}`);
+    core.info(`➡️ GeminiApiKey: ${geminiApiKey ? '✔️ Provided' : '❌ Missing'}`);
+    core.info(`➡️ PRNumber: ${prNumber}`);
+    core.info(`➡️ StyleGuide length: ${styleGuide.length}`);
+    core.info(`➡️ Diff file exists: ${fs.existsSync(diffPath)}`);
+    core.info(`➡️ Context file count: ${contextFilePaths.length}`);
+    contextFilePaths.forEach((file, index) => {
+      core.info(`📄 Context file ${index + 1}: ${file} (exists: ${fs.existsSync(file)})`);
+    });
+    core.info(`🧾 Form headers: ${JSON.stringify(form.getHeaders())}`);
 
     const response = await fetch(`${REVIEW_API_URL}/v1/beta/review?model=${model}`, {
       method: 'POST',
@@ -169,6 +155,9 @@ async function run() {
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      core.error(`❌ API responded with status ${response.status} ${response.statusText}`);
+      core.error(`❗ Response body: ${errorText}`);
       throw new Error(`API request failed with status ${response.status} ${response.statusText}`);
     }
 
@@ -177,17 +166,13 @@ async function run() {
     core.info("✅ Review received. Posting review as comment on PR...");
 
     const commentBody = beautifyReview(result.reviews);
-
     await octokit.rest.issues.createComment({
-      owner,
-      repo,
-      issue_number: prNumber,
-      body: commentBody
+      owner, repo, issue_number: prNumber, body: commentBody
     });
 
     core.info("🎉 Review comment posted!");
-
     core.endGroup();
+
   } catch (error: any) {
     core.setFailed(`❌ Action failed: ${error.message}`);
   }
