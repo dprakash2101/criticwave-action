@@ -6,14 +6,19 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 
+interface FixDetails {
+  description: string;
+  currentCode: string;
+  suggestedFixCode: string;
+}
+
 interface ReviewItem {
   issueType: string;
   description: string;
   severity: string;
   lineNumber: number;
   fileName: string;
-  suggestedFix: string;
-  codeSnippet: string;
+  fixDetails: FixDetails;
 }
 
 interface ReviewResponse {
@@ -40,16 +45,51 @@ async function wakeUpApi(apiUrl: string) {
 }
 
 function beautifyReview(reviews: ReviewItem[]): string {
-  if (!reviews || reviews.length === 0) return 'No issues found by CriticWave.';
-  let output = '### 🤖 CriticWave PR Review:\n\n';
-  for (const r of reviews) {
-    output += `---\n**Issue Type:** ${r.issueType}\n`;
-    output += `**File:** \`${r.fileName}:${r.lineNumber}\`\n`;
-    output += `**Severity:** ${r.severity}\n`;
-    output += `**Description:** ${r.description}\n`;
-    output += `**Suggested Fix:** ${r.suggestedFix}\n`;
-    output += '```csharp\n' + r.codeSnippet + '\n```\n\n';
+  if (!reviews || reviews.length === 0) {
+    return '🎉 **No issues found by CriticWave!** The code looks clean and ready to go!';
   }
+
+  // Map file extensions to Markdown code block language identifiers
+  const languageMap: { [key: string]: string } = {
+    '.cs': 'csharp',
+    '.js': 'javascript',
+    '.ts': 'typescript',
+    '.py': 'python',
+    '.java': 'java',
+    '.go': 'go',
+    '.rb': 'ruby',
+    '.php': 'php',
+    '.cpp': 'cpp',
+    '.c': 'c',
+    '.cshtml': 'html',
+    '.html': 'html',
+    '.css': 'css',
+    '.json': 'json',
+    '.xml': 'xml',
+    '.sql': 'sql',
+  };
+
+  let output = '### 🤖 CriticWave PR Review\n\n';
+  output += 'Below is the automated review of your pull request, highlighting potential improvements to make your code even better. Each issue includes a clear explanation and actionable suggestions.\n\n';
+
+  reviews.forEach((r, index) => {
+    // Determine the language based on file extension
+    const extension = r.fileName.substring(r.fileName.lastIndexOf('.'))?.toLowerCase() || '';
+    const language = languageMap[extension] || '';
+
+    output += `#### Issue ${index + 1}: ${r.issueType}\n`;
+    output += `**📍 Location:** \`${r.fileName}:${r.lineNumber}\`\n`;
+    output += `**⚠️ Severity:** ${r.severity}\n`;
+    output += `**🔍 Description:**\n${r.description}\n\n`;
+    output += `**💡 Suggested Fix:**\n${r.fixDetails.description}\n\n`;
+    output += `**📜 Current Code:**\n`;
+    output += `\`\`\`${language}\n` + (r.fixDetails.currentCode || '// No code provided') + '\n```\n';
+    output += `**✅ Proposed Fix:**\n`;
+    output += `\`\`\`${language}\n` + (r.fixDetails.suggestedFixCode || '// No suggestion provided') + '\n```\n';
+    output += '\n---\n\n';
+  });
+
+  output += 'Thanks for your contribution! Apply these suggestions to improve your code, or let us know if you have any questions! 🚀';
   return output;
 }
 
@@ -85,7 +125,7 @@ async function run() {
 
     const diff = diffResponse.data;
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'criticwave-'));
-    const diffPath = path.join(tmpDir, 'diff.diff'); // ✅ Changed from .patch to .diff
+    const diffPath = path.join(tmpDir, 'diff.diff');
     fs.writeFileSync(diffPath, diff, 'utf-8');
     core.info(`📁 Diff saved at ${diffPath}`);
 
