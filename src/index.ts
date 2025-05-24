@@ -58,10 +58,10 @@ async function run() {
     core.startGroup("🚀 Starting CriticWave PR Review");
 
     // Inputs
-    const token = core.getInput('token', { required: true });
-    const geminiApiKey = core.getInput('geminiApiKey', { required: true });
+    const token = core.getInput('github-token', { required: true });
+    const geminiApiKey = core.getInput('gemini-api-key', { required: true });
     const model = core.getInput('model') || 'gemini-2.0-flash';
-    const styleGuide = core.getInput('styleGuide', { required: true });
+    const styleGuide = core.getInput('pr-style-guide', { required: true });
 
     // Env vars for your API secrets
     const REVIEW_API_URL = process.env.REVIEW_API_URL;
