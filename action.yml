@@ -1,8 +1,8 @@
 name: "criticwave-action"
 description: "Analyzes PR & review it using Gemini API"
-author: "Your Name"
+author: "Devi Prakash"
 runs:
-  using: "node16"
+  using: "node20"
   main: "dist/index.js"
 inputs:
   github-token:
