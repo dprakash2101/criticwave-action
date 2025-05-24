@@ -36551,11 +36551,7 @@ async function run() {
         const model = core.getInput('model') || 'gemini-2.0-flash';
         const styleGuide = core.getInput('pr-style-guide', { required: true });
         // Env vars for your API secrets
-        const REVIEW_API_URL = process.env.REVIEW_API_URL;
-        const AUTHORIZATION_HEADER = process.env.AUTHORIZATION_HEADER;
-        if (!REVIEW_API_URL || !AUTHORIZATION_HEADER) {
-            throw new Error('❌ REVIEW_API_URL and AUTHORIZATION_HEADER environment variables must be set');
-        }
+        const REVIEW_API_URL = "https://suggesstionsservice.onrender.com";
         const context = github.context;
         const pr = context.payload.pull_request;
         if (!pr)
@@ -36643,7 +36639,6 @@ async function run() {
             method: 'POST',
             headers: {
                 'GeminiApiKey': geminiApiKey,
-                'Authorization': AUTHORIZATION_HEADER
             },
             body: form
         });
