@@ -3,7 +3,7 @@ description: "Analyzes PR & review it using Gemini API"
 author: "Your Name"
 runs:
   using: "node16"
-  main: "dist/main.js"
+  main: "dist/index.js"
 inputs:
   github-token:
     description: "GitHub token to post comments"
