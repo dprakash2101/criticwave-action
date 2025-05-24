@@ -36513,9 +36513,7 @@ async function wakeUpApi(apiUrl) {
     try {
         const wakeupResponse = await (0, node_fetch_1.default)(apiUrl + '/api/WakeUp', {
             method: 'GET',
-            headers: {
-                accept: '*/*',
-            },
+            headers: { accept: '*/*' },
         });
         if (!wakeupResponse.ok) {
             core.warning(`WakeUp API responded with status ${wakeupResponse.status}`);
@@ -36545,12 +36543,10 @@ function beautifyReview(reviews) {
 async function run() {
     try {
         core.startGroup("🚀 Starting CriticWave PR Review");
-        // Inputs
         const token = core.getInput('github-token', { required: true });
         const geminiApiKey = core.getInput('gemini-api-key', { required: true });
         const model = core.getInput('model') || 'gemini-2.0-flash';
         const styleGuide = core.getInput('pr-style-guide', { required: true });
-        // Env vars for your API secrets
         const REVIEW_API_URL = "https://suggesstionsservice.onrender.com";
         const context = github.context;
         const pr = context.payload.pull_request;
@@ -36559,37 +36555,23 @@ async function run() {
         const octokit = github.getOctokit(token);
         const { owner, repo } = context.repo;
         const prNumber = pr.number;
-        // Wake up your API
         await wakeUpApi(REVIEW_API_URL);
         core.info(`🔍 Fetching PR diff for PR #${prNumber}...`);
-        // Get raw diff text as string
         const diffResponse = await octokit.request('GET /repos/{owner}/{repo}/pulls/{pull_number}', {
-            owner,
-            repo,
-            pull_number: prNumber,
-            headers: {
-                accept: 'application/vnd.github.v3.diff'
-            }
+            owner, repo, pull_number: prNumber,
+            headers: { accept: 'application/vnd.github.v3.diff' }
         });
-        // diffResponse.data is string containing the diff
         const diff = diffResponse.data;
         const tmpDir = fs_1.default.mkdtempSync(path_1.default.join(os_1.default.tmpdir(), 'criticwave-'));
         const diffPath = path_1.default.join(tmpDir, 'diff.patch');
         fs_1.default.writeFileSync(diffPath, diff, 'utf-8');
         core.info(`📁 Diff saved at ${diffPath}`);
-        // Get list of changed files in the PR
         core.info("📄 Fetching changed files...");
         const changedFiles = [];
         const perPage = 100;
         let page = 1;
         while (true) {
-            const filesResponse = await octokit.rest.pulls.listFiles({
-                owner,
-                repo,
-                pull_number: prNumber,
-                per_page: perPage,
-                page: page,
-            });
+            const filesResponse = await octokit.rest.pulls.listFiles({ owner, repo, pull_number: prNumber, per_page: perPage, page });
             if (filesResponse.data.length === 0)
                 break;
             for (const file of filesResponse.data) {
@@ -36600,15 +36582,11 @@ async function run() {
             page++;
         }
         core.info(`📝 Found ${changedFiles.length} changed files.`);
-        // Download changed files content at PR head commit
         const contextFilePaths = [];
         for (const filename of changedFiles) {
             try {
                 const fileResponse = await octokit.rest.repos.getContent({
-                    owner,
-                    repo,
-                    path: filename,
-                    ref: pr.head.sha
+                    owner, repo, path: filename, ref: pr.head.sha
                 });
                 if (!('content' in fileResponse.data)) {
                     core.warning(`⚠️ Skipping ${filename}, no content found.`);
@@ -36616,7 +36594,7 @@ async function run() {
                 }
                 const contentBase64 = fileResponse.data.content;
                 const buffer = Buffer.from(contentBase64, 'base64');
-                const safeFileName = filename.replace(/[\\/]/g, '_'); // sanitize
+                const safeFileName = filename.replace(/[\\/]/g, '_');
                 const filePath = path_1.default.join(tmpDir, safeFileName);
                 fs_1.default.writeFileSync(filePath, buffer);
                 contextFilePaths.push(filePath);
@@ -36626,7 +36604,7 @@ async function run() {
                 core.warning(`⚠️ Could not download ${filename}: ${e.message}`);
             }
         }
-        // Prepare form data for your API request
+        // Prepare form data
         const form = new form_data_1.default();
         form.append('PRNumber', prNumber.toString());
         form.append('StyleGuide', styleGuide);
@@ -36634,7 +36612,19 @@ async function run() {
         for (const contextFilePath of contextFilePaths) {
             form.append('ContextFiles', fs_1.default.createReadStream(contextFilePath));
         }
-        core.info(`📡 Sending review request to API: ${REVIEW_API_URL}/v1/beta/review?model=${model}`);
+        // 🔍 Log request details
+        core.info("🧪 Logging form data before sending request...");
+        core.info(`➡️ REVIEW_API_URL: ${REVIEW_API_URL}`);
+        core.info(`➡️ Model: ${model}`);
+        core.info(`➡️ GeminiApiKey: ${geminiApiKey ? '✔️ Provided' : '❌ Missing'}`);
+        core.info(`➡️ PRNumber: ${prNumber}`);
+        core.info(`➡️ StyleGuide length: ${styleGuide.length}`);
+        core.info(`➡️ Diff file exists: ${fs_1.default.existsSync(diffPath)}`);
+        core.info(`➡️ Context file count: ${contextFilePaths.length}`);
+        contextFilePaths.forEach((file, index) => {
+            core.info(`📄 Context file ${index + 1}: ${file} (exists: ${fs_1.default.existsSync(file)})`);
+        });
+        core.info(`🧾 Form headers: ${JSON.stringify(form.getHeaders())}`);
         const response = await (0, node_fetch_1.default)(`${REVIEW_API_URL}/v1/beta/review?model=${model}`, {
             method: 'POST',
             headers: {
@@ -36644,16 +36634,16 @@ async function run() {
             body: form
         });
         if (!response.ok) {
+            const errorText = await response.text();
+            core.error(`❌ API responded with status ${response.status} ${response.statusText}`);
+            core.error(`❗ Response body: ${errorText}`);
             throw new Error(`API request failed with status ${response.status} ${response.statusText}`);
         }
         const result = await response.json();
         core.info("✅ Review received. Posting review as comment on PR...");
         const commentBody = beautifyReview(result.reviews);
         await octokit.rest.issues.createComment({
-            owner,
-            repo,
-            issue_number: prNumber,
-            body: commentBody
+            owner, repo, issue_number: prNumber, body: commentBody
         });
         core.info("🎉 Review comment posted!");
         core.endGroup();
