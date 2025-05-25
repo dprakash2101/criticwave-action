@@ -6,6 +6,14 @@
 
 ---
 
+**⚠️ Experimental State Notice:**  
+This project is currently in an experimental state and is a work in progress. This is the initial version. Features and APIs may change, and stability is not guaranteed.
+
+**CriticWave Action** is a GitHub Action that analyzes your Pull Requests (PRs) using the Gemini API to provide detailed code reviews. It posts comments directly on the PR with identified issues, severity, explanations, and suggested fixes — all powered by AI.
+
+
+---
+
 ## Architecture
 
 ![CriticWave Architecture](docs/assets/architecture.png)
@@ -33,6 +41,14 @@
 | `gemini-api-key` | Your Gemini API key                     | Yes      | —                   |
 | `pr-style-guide` | Style guide prompt for review           | Yes      | —                   |
 | `model`          | Gemini model to use for review API      | No       | `gemini-2.0-flash`  |
+
+---
+
+### ⚠️ Important Security Notice
+
+- **Store your GitHub token and Gemini API key as secrets in your repository settings!**
+- Never hardcode tokens or API keys in your workflow or code.
+- Use GitHub Secrets such as `GITHUB_TOKEN` and `GEMINI_API_KEY` to keep your credentials secure.
 
 ---
 
@@ -84,6 +100,12 @@ jobs:
 * The Review API URL is currently hardcoded but can be parameterized if needed.
 
 ---
+## Sample PR Review
+
+You can view a sample automated PR review here:  
+[CriticWave Sample Review](https://github.com/dprakash2101/GeminiSharp/pull/24#issuecomment-2907735191)
+
+---
 
 ## Troubleshooting
 
@@ -96,7 +118,8 @@ jobs:
 
 ## Author
 
-**Devi Prakash**
+**Devi Prakash** — [GitHub Profile](https://github.com/dprakash2101)
+
 
 ---
 
