@@ -11,9 +11,10 @@ jobs:
     steps:
       - name: Checkout main branch
         uses: actions/checkout@v4
+
         with:
           fetch-depth: 0 # Fetch full history for accurate git operations
-
+          
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
