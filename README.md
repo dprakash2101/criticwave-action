@@ -9,7 +9,6 @@
 **⚠️ Experimental State Notice:**  
 This project is currently in an experimental state and is a work in progress. This is the initial version. Features and APIs may change, and stability is not guaranteed.
 
-**CriticWave Action** is a GitHub Action that analyzes your Pull Requests (PRs) using the Gemini API to provide detailed code reviews. It posts comments directly on the PR with identified issues, severity, explanations, and suggested fixes — all powered by AI.
 
 
 ---
