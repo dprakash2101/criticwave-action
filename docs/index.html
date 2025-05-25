@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CriticWave Action - GitHub Action</title>
   <style>
     body {
@@ -104,15 +104,17 @@
       font-size: 0.9em;
       color: #586069;
     }
-    .diagram-container {
+    /* Image styling */
+    .diagram {
       text-align: center;
-      margin: 20px 0;
+      margin: 24px 0;
     }
-    .diagram-container img {
+    .diagram img {
       max-width: 100%;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      height: auto;
+      border: 1px solid #dfe2e5;
+      border-radius: 6px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
   </style>
 </head>
@@ -122,13 +124,13 @@
 
     <div class="badge-container">
       <a href="https://github.com/marketplace/actions/criticwave-action" target="_blank" rel="noopener noreferrer">
-        <img src="https://img.shields.io/badge/GitHub%20Marketplace-CriticWave-blue" alt="GitHub Marketplace">
+        <img src="https://img.shields.io/badge/GitHub%20Marketplace-CriticWave-blue" alt="GitHub Marketplace" />
       </a>
     </div>
 
     <p><strong>CriticWave Action</strong> is a GitHub Action that analyzes your Pull Requests (PRs) using the Gemini API to provide detailed code reviews. It posts comments directly on the PR with identified issues, severity, explanations, and suggested fixes — all powered by AI.</p>
 
-    <hr>
+    <hr />
 
     <h2>Features</h2>
     <ul>
@@ -140,7 +142,7 @@
       <li>Handles large PRs by uploading all relevant files for thorough analysis</li>
     </ul>
 
-    <hr>
+    <hr />
 
     <h2>Usage</h2>
 
@@ -207,24 +209,23 @@ jobs:
           model: gemini-2.0-flash
     </code></pre>
 
-    <hr>
+    <hr />
 
     <h2>How It Works</h2>
     <ol>
       <li>The action triggers on pull request events.</li>
       <li>It fetches the PR diff and all changed files at the PR head commit.</li>
       <li>It sends the diff, full changed files, style guide prompt, and other metadata to the Review API.</li>
-      <li>The Review API (powered by Gemini API) analyzes the code and generates a structured review response with issues and fixes.</li>
+      <li>The Review API (powered by Gemini API) analyzes the code, generates a structured review response with issues and fixes.</li>
       <li>The action formats the response into a Markdown comment and posts it on the PR.</li>
       <li>Developers get an AI-powered code review directly within GitHub.</li>
     </ol>
 
-    <div class="diagram-container">
-      <h2>Architecture Diagram</h2>
-      <img src="../assets/architecture.png" alt="CriticWave Architecture Diagram">
+    <div class="diagram">
+      <img src="../assets/architecture.png" alt="Architecture Diagram" />
     </div>
 
-    <hr>
+    <hr />
 
     <h2>Advanced Notes</h2>
     <ul>
@@ -235,29 +236,6 @@ jobs:
       <li>The Review API URL is currently hardcoded but can be parameterized if needed.</li>
     </ul>
 
-    <hr>
+    <hr />
 
-    <h2>Troubleshooting</h2>
-    <ul>
-      <li>Ensure your <code>gemini-api-key</code> is valid and has sufficient quota.</li>
-      <li>The action only runs on pull request events.</li>
-      <li>If the review API is slow, the action tries to "wake it up" before sending the request.</li>
-      <li>Large PRs with many files might take longer due to file downloads and uploads.</li>
-    </ul>
-
-    <hr>
-
-    <h2>Author</h2>
-    <p><strong>Devi Prakash</strong></p>
-
-    <hr>
-
-    <h2>License</h2>
-    <p>This project is licensed under the MIT License. See the <a href="LICENSE">LICENSE</a> file for details.</p>
-
-    <div class="footer">
-      <p>Generated for CriticWave GitHub Action</p>
-    </div>
-  </div>
-</body>
-</html>
+   
