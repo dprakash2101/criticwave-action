@@ -196,16 +196,6 @@
 
         <hr />
 
-        <h2>Warning</h2>
-        <div class="warning">
-            ⚠️ <strong>Important:</strong> Never hardcode your <code>github-token</code> or <code>gemini-api-key</code>
-            directly in your workflow or code. <br />
-            Always store them securely as <a href="https://docs.github.com/en/actions/security-guides/encrypted-secrets"
-                target="_blank" rel="noopener noreferrer">GitHub Secrets</a> and reference them using
-            <code>secrets.&lt;NAME&gt;</code> in your workflow files.<br />
-            Exposing these keys publicly can lead to security risks and unauthorized usage.
-        </div>
-
         <h2>Experimental / Work In Progress</h2>
         <div class="experimental">
             🚧 This project is currently in an <strong>experimental state</strong> and a <strong>work in
@@ -313,6 +303,16 @@ jobs:
         </div>
 
         <hr />
+        
+        <h2>Warning</h2>
+        <div class="warning">
+            ⚠️ <strong>Important:</strong> Never hardcode your <code>github-token</code> or <code>gemini-api-key</code>
+            directly in your workflow or code. <br />
+            Always store them securely as <a href="https://docs.github.com/en/actions/security-guides/encrypted-secrets"
+                target="_blank" rel="noopener noreferrer">GitHub Secrets</a> and reference them using
+            <code>secrets.&lt;NAME&gt;</code> in your workflow files.<br />
+            Exposing these keys publicly can lead to security risks and unauthorized usage.
+        </div>
 
         <h2>Advanced Notes</h2>
         <ul>
@@ -356,7 +356,7 @@ jobs:
         <hr />
 
         <h2>License</h2>
-        <p>This project is licensed under the MIT License. See the <a href="LICENSE" target="_blank"
+        <p>This project is licensed under the MIT License. See the <a href="https://github.com/dprakash2101/criticwave-action/blob/main/LICENSE" target="_blank"
                 rel="noopener noreferrer">LICENSE</a> file for details.</p>
 
         <div class="footer">
