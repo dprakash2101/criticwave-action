@@ -2,6 +2,10 @@ name: "criticwave-action"
 description: "Analyzes PR & review it using Gemini API"
 author: "Devi Prakash"
 
+branding:
+  icon: "code-review"  
+  color: "blue"
+
 inputs:
   github-token:
     description: "GitHub token to post comments"
