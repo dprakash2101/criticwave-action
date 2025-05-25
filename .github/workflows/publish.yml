@@ -9,34 +9,34 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout master branch
+      - name: Checkout main branch
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # needed to push commits and create tags
+          fetch-depth: 0
+          token: ${{ secrets.ACCESS_TOKEN }} # PAT with repo access
+
+      - name: Setup Git safe directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install
+        run: npm i
 
       - name: Build project
-        run: npm run build  # your build command that produces dist/
+        run: npm run build
 
       - name: Commit dist folder if changed
-        id: commit-dist
         run: |
           git config user.name "dprakash2101"
           git config user.email "${{ secrets.EMAIL }}"
           git add dist
-          # Check if there is any diff
           if ! git diff --cached --quiet; then
-            git commit -m "Build: update dist folder on master push"
-            git pull --rebase origin main 
+            git commit -m "Build: update dist folder on main push"
+            git pull --rebase origin main
             git push origin main
-            echo "dist_committed=true" >> $GITHUB_OUTPUT
           else
-            echo "dist_committed=false" >> $GITHUB_OUTPUT
-          fi
+            echo "No changes in dist folder"
