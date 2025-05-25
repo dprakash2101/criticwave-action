@@ -11,9 +11,6 @@ jobs:
     steps:
       - name: Checkout main branch
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.ACCESS_TOKEN }} # PAT with repo access
 
       - name: Setup Git safe directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
