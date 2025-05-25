@@ -8,7 +8,7 @@
 
 ## Architecture
 
-![CriticWave Architecture](assets/architecture.png)
+![CriticWave Architecture](docs/assets/architecture.png)
 
 ---
 
