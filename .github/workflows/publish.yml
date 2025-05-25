@@ -1,4 +1,4 @@
-name: Build and release on master push
+name: Build and release on main push
 
 on:
   push:
@@ -12,31 +12,54 @@ jobs:
       - name: Checkout main branch
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          token: ${{ secrets.ACCESS_TOKEN }} # PAT with repo access
-
-      - name: Setup Git safe directory
-        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          fetch-depth: 0 # Fetch full history for accurate git operations
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20' # Use a string to avoid deprecation warnings
+          cache: 'npm' # Cache npm dependencies to speed up installs
+
+      - name: Verify Node.js and npm versions
+        run: |
+          node --version
+          npm --version
 
       - name: Install dependencies
-        run: npm i
+        run: npm install
+        continue-on-error: false # Fail the workflow if npm install fails
 
-      - name: Build project
-        run: npm run build
+      - name: Debug package.json
+        run: cat package.json # Output package.json for debugging
+
+      - name: Run build
+        run: |
+          echo "Running npm run build..."
+          npm run build || { echo "Build failed, check logs above for errors"; exit 1; }
+        env:
+          CI: true # Ensure CI environment is set for consistent builds
+
+      - name: Check dist folder
+        run: |
+          if [ -d "dist" ]; then
+            echo "dist folder exists"
+            ls -la dist
+          else
+            echo "dist folder not found, build may have failed"
+            exit 1
+          fi
 
       - name: Commit dist folder if changed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EMAIL: ${{ secrets.EMAIL }}
         run: |
           git config user.name "dprakash2101"
-          git config user.email "${{ secrets.EMAIL }}"
+          git config user.email "${EMAIL:-github-actions@github.com}"
           git add dist
           if ! git diff --cached --quiet; then
             git commit -m "Build: update dist folder on main push"
-            git pull --rebase origin main
             git push origin main
           else
-            echo "No changes in dist folder"
+            echo "No changes in dist folder, skipping commit"
+          fi
