@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CriticWave Action - GitHub Action</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f6f8fa;
+            color: #24292e;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background-color: #fff;
+            border: 1px solid #e1e4e8;
+            border-radius: 6px;
+        }
+        h1, h2, h3 {
+            border-bottom: 1px solid #eaecef;
+            padding-bottom: 0.3em;
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+        h1 { font-size: 2em; }
+        h2 { font-size: 1.5em; }
+        h3 { font-size: 1.25em; }
+        a {
+            color: #0366d6;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .badge-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .badge-container img {
+            margin: 0 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 16px;
+            display: block;
+            overflow-x: auto; /* For wider tables */
+        }
+        th, td {
+            padding: 6px 13px;
+            border: 1px solid #dfe2e5;
+            text-align: left;
+        }
+        th {
+            font-weight: 600;
+            background-color: #f6f8fa;
+        }
+        pre {
+            background-color: #f6f8fa;
+            padding: 16px;
+            overflow: auto;
+            font-size: 85%;
+            line-height: 1.45;
+            border-radius: 3px;
+            margin-bottom: 16px;
+        }
+        code {
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 85%;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            background-color: rgba(27,31,35,0.05);
+            border-radius: 3px;
+        }
+        pre code {
+            padding: 0;
+            margin: 0;
+            background-color: transparent;
+            border: 0;
+        }
+        ul, ol {
+            padding-left: 2em;
+            margin-bottom: 16px;
+        }
+        li {
+            margin-bottom: 0.25em;
+        }
+        hr {
+            height: 0.25em;
+            padding: 0;
+            margin: 24px 0;
+            background-color: #e1e4e8;
+            border: 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #586069;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CriticWave Action</h1>
+
+        <div class="badge-container">
+            <a href="https://github.com/marketplace/actions/criticwave-action" target="_blank" rel="noopener noreferrer">
+                <img src="https://img.shields.io/badge/GitHub%20Marketplace-CriticWave-blue" alt="GitHub Marketplace">
+            </a>
+        </div>
+
+        <p><strong>CriticWave Action</strong> is a GitHub Action that analyzes your Pull Requests (PRs) using the Gemini API to provide detailed code reviews. It posts comments directly on the PR with identified issues, severity, explanations, and suggested fixes — all powered by AI.</p>
+
+        <hr>
+
+        <h2>Features</h2>
+        <ul>
+            <li>Automatically fetches PR diffs and full files changed in the PR</li>
+            <li>Sends diff and full context files to a backend Review API powered by Gemini API</li>
+            <li>Supports customizable style guide prompts for consistent review style</li>
+            <li>Posts clear, actionable review comments in the PR conversation</li>
+            <li>Supports multiple file types and highlights code snippets with syntax highlighting</li>
+            <li>Handles large PRs by uploading all relevant files for thorough analysis</li>
+        </ul>
+
+        <hr>
+
+        <h2>Usage</h2>
+
+        <h3>Inputs</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Required</th>
+                    <th>Default</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>github-token</code></td>
+                    <td>GitHub token to post comments</td>
+                    <td>Yes</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>gemini-api-key</code></td>
+                    <td>Your Gemini API key</td>
+                    <td>Yes</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>pr-style-guide</code></td>
+                    <td>Style guide prompt for review</td>
+                    <td>Yes</td>
+                    <td>—</td>
+                </tr>
+                <tr>
+                    <td><code>model</code></td>
+                    <td>Gemini model to use for review API</td>
+                    <td>No</td>
+                    <td><code>gemini-2.0-flash</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Example Workflow</h3>
+        <pre><code class="language-yaml">
+name: PR Review with CriticWave
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run CriticWave PR Review
+        uses: dprakash2101/criticwave-action@v1.0.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          gemini-api-key: ${{ secrets.GEMINI_API_KEY }}
+          pr-style-guide: |
+            Please review the code for best practices, readability, security, and performance.
+            Follow the company style guide: https://example.com/style-guide
+          model: gemini-2.0-flash
+        </code></pre>
+
+        <hr>
+
+        <h2>How It Works</h2>
+        <ol>
+            <li>The action triggers on pull request events.</li>
+            <li>It fetches the PR diff and all changed files at the PR head commit.</li>
+            <li>It sends the diff, full changed files, style guide prompt, and other metadata to the Review API.</li>
+            <li>The Review API (powered by Gemini API) analyzes the code, generates a structured review response with issues and fixes.</li>
+            <li>The action formats the response into a Markdown comment and posts it on the PR.</li>
+            <li>Developers get an AI-powered code review directly within GitHub.</li>
+        </ol>
+
+        <hr>
+
+        <h2>Advanced Notes</h2>
+        <ul>
+            <li>The action creates a temporary folder to store diff and full context files before sending.</li>
+            <li>It supports multiple full files to improve the accuracy of reviews by providing full context.</li>
+            <li>The style guide input allows tailoring the review tone and focus.</li>
+            <li>You can specify the Gemini model for customized review behavior.</li>
+            <li>The Review API URL is currently hardcoded but can be parameterized if needed.</li>
+        </ul>
+
+        <hr>
+
+        <h2>Troubleshooting</h2>
+        <ul>
+            <li>Ensure your <code>gemini-api-key</code> is valid and has sufficient quota.</li>
+            <li>The action only runs on pull request events.</li>
+            <li>If the review API is slow, the action tries to "wake it up" before sending the request.</li>
+            <li>Large PRs with many files might take longer due to file downloads and uploads.</li>
+        </ul>
+
+        <hr>
+
+        <h2>Author</h2>
+        <p><strong>Devi Prakash</strong></p>
+
+        <hr>
+
+        <h2>License</h2>
+        <p>This project is licensed under the MIT License. See the <a href="LICENSE">LICENSE</a> file for details. (<em>Note: You'll need to create a LICENSE file in your repository for this link to work, or link to a generic MIT license online.</em>)</p>
+
+        <div class="footer">
+            <p>Generated from README.md for CriticWave Action</p>
+        </div>
+    </div>
+</body>
+</html>
