@@ -1,23 +1,22 @@
 name: "criticwave-action"
 description: "Analyzes PR & review it using Gemini API"
 author: "Devi Prakash"
-branding:
-  icon: 'message-square' 
-  color: 'blue'          
+
+inputs:
+  github-token:
+    description: "GitHub token to post comments"
+    required: true
+  gemini-api-key:
+    description: "Your Gemini API key"
+    required: true
+  pr-style-guide:
+    description: "Style guide prompt for the review"
+    required: true
+  model:
+    description: "Model to use for review API"
+    required: false
+    default: "gemini-2.0-flash"
+
 runs:
   using: "node20"
   main: "dist/index.js"
-inputs:
-  github-token:
-    description: "GitHub token to post comments. Typically ${{ secrets.GITHUB_TOKEN }}"
-    required: true
-  gemini-api-key:
-    description: "Your Google AI Gemini API key. Store as a repository secret."
-    required: true
-  pr-style-guide:
-    description: "Detailed style guide prompt for the AI review (e.g., coding standards, points of focus)."
-    required: true
-  model:
-    description: "The Gemini model to use for the review via the backend API."
-    required: false
-    default: "gemini-2.0-flash" 
