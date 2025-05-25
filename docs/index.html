@@ -244,7 +244,7 @@
             </thead>
             <tbody>
                 <tr>
-                    <td><code>Access-token</code></td>
+                    <td><code>github-token</code></td>
                     <td>GitHub token to post comments</td>
                     <td>Yes</td>
                     <td>—</td>
@@ -287,7 +287,7 @@ jobs:
       - name: Run CriticWave PR Review
         uses: dprakash2101/criticwave-action@v1.0.0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.ACCESS_TOKEN }}
           gemini-api-key: ${{ secrets.GEMINI_API_KEY }}
           pr-style-guide: |
             Please review the code for best practices, readability, security, and performance.
