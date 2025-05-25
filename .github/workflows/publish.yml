@@ -34,8 +34,8 @@ jobs:
           # Check if there is any diff
           if ! git diff --cached --quiet; then
             git commit -m "Build: update dist folder on master push"
-            git pull --rebase origin master 
-            git push origin master
+            git pull --rebase origin main 
+            git push origin main
             echo "dist_committed=true" >> $GITHUB_OUTPUT
           else
             echo "dist_committed=false" >> $GITHUB_OUTPUT
