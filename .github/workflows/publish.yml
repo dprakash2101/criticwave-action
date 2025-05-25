@@ -1,0 +1,42 @@
+name: Build and release on master push
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout master branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # needed to push commits and create tags
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build  # your build command that produces dist/
+
+      - name: Commit dist folder if changed
+        id: commit-dist
+        run: |
+          git config user.name "dprakash2101"
+          git config user.email "${{ secrets.EMAIL }}"
+          git add dist
+          # Check if there is any diff
+          if ! git diff --cached --quiet; then
+            git commit -m "Build: update dist folder on master push"
+            git pull --rebase origin master 
+            git push origin master
+            echo "dist_committed=true" >> $GITHUB_OUTPUT
+          else
+            echo "dist_committed=false" >> $GITHUB_OUTPUT
+          fi
