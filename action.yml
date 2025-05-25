@@ -3,7 +3,7 @@ description: "Analyzes PR & review it using Gemini API"
 author: "Devi Prakash"
 
 branding:
-  icon: "code-review"  
+  icon: "code"  
   color: "blue"
 
 inputs:
