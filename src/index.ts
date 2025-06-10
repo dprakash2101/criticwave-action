@@ -208,6 +208,8 @@ async function run() {
     }
 
     const result: ReviewResponse = await response.json();
+    core.info('✅ API Response received:');
+    core.info(JSON.stringify(result, null, 2));
     core.info('✅ Review received, posting comment on PR...');
 
     const commentBody = beautifyReview(result.reviews);
